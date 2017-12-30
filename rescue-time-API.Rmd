@@ -45,3 +45,43 @@ df_raw <- content(cxn) %>%
 ```{r}
 head(df)
 ```
+
+```{r}
+plot <- df %>%
+    ggplot(aes(x = Hours)) +
+    geom_bar() +
+    facet_wrap(~Category)
+plot
+```
+
+```{r}
+plot <- df %>%
+    ggplot(aes(Activity, Hours)) +
+    geom_bar(stat = "identity")
+plot
+```
+
+```{r}
+df_sum <- df_raw %>%
+    group_by(Activity) %>%
+    summarise(TotalHours = sum(Hours)) %>%
+    top_n(20, TotalHours) %>%
+    arrange(-TotalHours) %>%
+    ungroup() %>%
+    mutate(Activity = factor(Activity,
+                         levels = df_sum$Activity[order(df_sum$TotalHours)]))
+
+# data$carb <- factor(data$carb, levels = data$carb[order(-data$mpg)])
+plot <- df_sum %>%
+    ggplot(aes(Activity, TotalHours)) +
+    # ggplot(aes(reorder(Activity, -table(Activity)[Activity]), TotalHours)) +
+    geom_bar(stat = "identity") +
+    # scale_x_discrete(limits = positions)
+    coord_flip()
+plot
+```
+
+```{r}
+
+```
+
