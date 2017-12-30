@@ -1,0 +1,47 @@
+---
+title: "Untitled"
+author: "Anders Swanson"
+date: "12/29/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning = FALSE}
+library(tidyverse)
+library(httr)
+library(lubridate)
+library(ggplot2)
+
+KEY <- read_lines("keyfile.txt")
+```
+
+
+
+```{r}
+cxn <- GET("https://www.rescuetime.com/anapi/data",
+           query = list(
+               key = KEY,
+               format = "csv",
+               perspective = "interval",
+               resolution_time = "day",
+               restrict_begin = "2017-09-01",
+               restrict_end = "2017-12-29",
+               restrict_activity = ""
+           ))
+http_status(cxn)$message
+```
+
+```{r}
+df_raw <- content(cxn) %>%
+    select(-`Number of People`) %>%
+    arrange(Date) %>%
+    mutate(Duration = dseconds(`Time Spent (seconds)`),
+           Hours = `Time Spent (seconds)`/(60*60))
+```
+
+```{r}
+head(df)
+```
