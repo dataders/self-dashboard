@@ -18,20 +18,33 @@ library(ggplot2)
 KEY <- read_lines("keyfile.txt")
 ```
 
-
-
 ```{r}
-cxn <- GET("https://www.rescuetime.com/anapi/data",
+getData <- function(YEAR) {
+    START <- paste0(as.character(YEAR),
+                        "-01-01")
+    END <- paste0(as.character(YEAR+1),
+                    "-01-01")
+    
+    cxn <- GET("https://www.rescuetime.com/anapi/data",
            query = list(
                key = KEY,
                format = "csv",
                perspective = "interval",
-               resolution_time = "day",
-               restrict_begin = "2017-09-01",
-               restrict_end = "2017-12-29",
+               resolution_time = "week",
+               restrict_begin = START,
+               restrict_end = END,
                restrict_activity = ""
            ))
-http_status(cxn)$message
+    print(http_status(cxn)$message)
+    
+    content(cxn)
+}
+
+df_13 <- getData(2013)
+df_14 <- getData(2014)
+df_15 <- getData(2015)
+df_16 <- getData(2016)
+df_17 <- getData(2017)
 ```
 
 ```{r}
