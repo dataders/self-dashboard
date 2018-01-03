@@ -61,12 +61,13 @@ head(df_munge)
 
 
 ```{r}
-df_sum <- df_raw %>%
+df_sum <- df_munge %>%
     group_by(Activity) %>%
     summarise(TotalHours = sum(Hours)) %>%
     top_n(20, TotalHours) %>%
     arrange(-TotalHours) %>%
-    ungroup() %>%
+    ungroup()
+df_sum <- df_sum %>%
     mutate(Activity = factor(Activity,
                          levels = df_sum$Activity[order(df_sum$TotalHours)]))
 
@@ -81,6 +82,37 @@ plot
 ```
 
 ```{r}
+df_sub <- df_munge %>%
+    right_join(select(df_sum, Activity), by = "Activity")
 
+
+plot <- df_sub %>%
+    ggplot(aes(x=Date, y=Hours,
+               color=Activity)) +
+    geom_line() +
+    geom_point() +
+    facet_wrap(~Productivity)
+
+plot
+```
+
+```{r}
+df_sub <- df_munge %>%
+    group_by(Date, Activity) %>%
+    summarise(TotalHours = sum(Hours)) %>%
+    top_n(25, TotalHours) %>%
+    arrange(-TotalHours) %>%
+    ungroup() %>%
+    mutate(Activity = as.factor(Activity))
+
+
+plot <- df_sub %>%
+    ggplot(aes(x=Date, y=Hours,
+               color=Activity)) +
+    # geom_point(show.legend = TRUE) +
+    geom_line(show.legend = TRUE)
+    
+    
+plot
 ```
 
