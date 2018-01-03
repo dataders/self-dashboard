@@ -16,9 +16,7 @@ library(lubridate)
 library(ggplot2)
 
 KEY <- read_lines("keyfile.txt")
-```
 
-```{r}
 getData <- function(YEAR) {
     START <- paste0(as.character(YEAR),
                         "-01-01")
@@ -35,44 +33,32 @@ getData <- function(YEAR) {
                restrict_end = END,
                restrict_activity = ""
            ))
+    print(paste0("Processing: ", YEAR))
     print(http_status(cxn)$message)
     
-    content(cxn)
+    content(cxn, col_types = cols())
 }
-
-df_13 <- getData(2013)
-df_14 <- getData(2014)
-df_15 <- getData(2015)
-df_16 <- getData(2016)
-df_17 <- getData(2017)
 ```
 
 ```{r}
-df_raw <- content(cxn) %>%
+year_range <- 2013:2017
+
+df_raw <- lapply(year_range, getData) %>%
+    setNames(year_range) %>%
+    bind_rows(.id = "year")
+
+df_munge <- df_raw %>%
     select(-`Number of People`) %>%
     arrange(Date) %>%
     mutate(Duration = dseconds(`Time Spent (seconds)`),
            Hours = `Time Spent (seconds)`/(60*60))
 ```
 
-```{r}
-head(df)
-```
 
 ```{r}
-plot <- df %>%
-    ggplot(aes(x = Hours)) +
-    geom_bar() +
-    facet_wrap(~Category)
-plot
+head(df_munge)
 ```
 
-```{r}
-plot <- df %>%
-    ggplot(aes(Activity, Hours)) +
-    geom_bar(stat = "identity")
-plot
-```
 
 ```{r}
 df_sum <- df_raw %>%
